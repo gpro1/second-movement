@@ -42,9 +42,11 @@ void fertility_tracker_face_setup(uint8_t watch_face_index, void ** context_ptr)
     {
         *context_ptr = malloc(sizeof(fertility_tracker_state_t));
         memset(*context_ptr, 0, sizeof(fertility_tracker_state_t));
+        ((fertility_tracker_state_t*)*context_ptr)->state = CALENDAR;
+        ((fertility_tracker_state_t*)*context_ptr)->current_date = movement_get_local_date_time();
     } 
-    ((fertility_tracker_state_t*)*context_ptr)->state = CALENDAR;
-    ((fertility_tracker_state_t*)*context_ptr)->current_date = watch_rtc_get_date_time();
+
+
 }
 
 void fertility_tracker_face_activate(void *context)
@@ -66,7 +68,7 @@ bool fertility_tracker_face_loop(movement_event_t event, void *context)
         case EVENT_ACTIVATE:
 
             //Update state if a new day has arrived
-            temp_time = watch_rtc_get_date_time();
+            temp_time = movement_get_local_date_time();
             num_days_missed = num_days_passed(temp_time, face_buf->current_date);
 
             if(num_days_missed >= MAX_MISSED_DAYS)
@@ -369,7 +371,7 @@ bool fertility_tracker_face_loop(movement_event_t event, void *context)
             {
                 case CALENDAR:
                     
-                    temp_time = watch_rtc_get_date_time();
+                    temp_time = movement_get_local_date_time();
     
                     //Set input buffers to current data (default values if new day)
                     face_buf->fluid_input = face_buf->fluid_buf[face_buf->data_index];
@@ -605,7 +607,7 @@ static enum cycle_state_t iterate_cycle_fsm(fertility_tracker_state_t * data_buf
     bool ovulation_confirmed = false;
     bool temp_shift_detected = false;
 
-    temp_time = watch_rtc_get_date_time();
+    temp_time = movement_get_local_date_time();
 
     switch(data_buf->cycle_state)
     {
@@ -783,7 +785,7 @@ static bool is_fertile(fertility_tracker_state_t * data_buf)
 {
     bool fertility_status = true;
     watch_date_time_t temp_time;
-    temp_time = watch_rtc_get_date_time();
+    temp_time = movement_get_local_date_time();
 
     switch(data_buf->cycle_state)
     {
@@ -1092,7 +1094,7 @@ static bool reset_face_buf(fertility_tracker_state_t * data_buf)
 
     memset(data_buf, 0, sizeof(fertility_tracker_state_t));
     data_buf->state = CALENDAR;
-    data_buf->current_date = watch_rtc_get_date_time();
+    data_buf->current_date = movement_get_local_date_time();
     enter_error_state(data_buf);
 
     return return_val;
